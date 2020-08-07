@@ -85,8 +85,15 @@ class PieceData(object):
         else:
             self.startTime = self.calculateTime(self.start)
         if self.end is None:
-            self.endTime = self.endTime.replace(
-                year=self.date.year, month=self.date.month, day=self.date.day, hour=23, minute=59, second=59)
+            if self.date == datetime.datetime.now().date():
+                now = datetime.datetime.now()
+                self.endTime = self.endTime.replace(
+                    year=now.year, month=now.month, day=now.day,
+                    hour=now.hour, minute=now.minute, second=now.second)
+            else:
+                self.endTime = self.endTime.replace(
+                    year=self.date.year, month=self.date.month, day=self.date.day,
+                    hour=23, minute=59, second=59)
         else:
             self.endTime = self.calculateTime(self.end)
         if self.time is None:

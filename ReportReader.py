@@ -3,13 +3,24 @@ Report Reader for Intermac Vertmax
 """
 
 from tkinter import *
+import glob
 import os
 import datetime
 import tkcalendar  # https://github.com/j4321/tkcalendar
 import random
 from tkintertable import TableCanvas, TableModel  # https://github.com/dmnfarrell/tkintertable
 
-reportFolder = r'C:\WNC\user\REPORTS'
+reportFolder = ''
+defaultCfg = 'C:/WNC/user/REPORTS'
+if not os.path.exists('reportreader.cfg'):
+    with open('reportreader.cfg', 'w+', encoding="utf-8") as cfg:
+        cfg.write(defaultCfg)
+        cfg.close()
+        reportFolder = defaultCfg
+else:
+    with open('reportreader.cfg', 'r', encoding="utf-8") as cfg:
+        reportFolder = cfg.read()
+        cfg.close()
 
 
 def toFixed(numObj, digits=0):
@@ -169,14 +180,18 @@ class RRInterface(Frame):
         self.readReportFile(date)
 
     def createFileList(self):
-        fileList = [f for f in os.listdir(reportFolder) if os.path.isfile(os.path.join(reportFolder, f))]
+        fileList = glob.glob(reportFolder+"\\*.REP")
         for file in fileList:
+            file = file.replace(reportFolder+"\\", "")
             if int(file[1:5]) < 2000:
                 continue
             self.dateList.append(
                 datetime.date(year=int(file[1:5]), month=monthToInt.get(file[5:8]), day=int(file[8:10])))
         self.dateList.sort()
-        self.calWidget.configure(mindate=self.dateList[0])
+        if len(self.dateList) > 0:
+            self.calWidget.configure(mindate=self.dateList[0])
+        else:
+            self.calWidget.configure(mindate=datetime.datetime.now())
 
     def createTable(self):
         data = {
@@ -318,6 +333,7 @@ class RRInterface(Frame):
 root = Tk()
 root.geometry("1250x500")
 root.resizable(0, 0)
+root.title("Report Reader")
 interface = RRInterface(root)
 
 root.mainloop()
